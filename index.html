@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CG-OS :: Chaingear Gaming Operating System Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0b0d12;
+      --card-bg: rgba(18, 22, 31, 0.85);
+      --border-color: #2a3245;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff66;
+      --accent-amber: #ffb700;
+      --accent-red: #ff3366;
+      --text-main: #e2e8f0;
+      --text-dim: #64748b;
+      --slot-empty: rgba(255, 255, 255, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.05), transparent 70%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+      transition: background 0.3s ease;
+    }
+
+    /* STREAM MODE OVERRIDES */
+    body.stream-mode {
+      background: transparent !important;
+      background-image: none !important;
+      padding: 10px;
+    }
+
+    body.stream-mode header {
+      display: none;
+    }
+
+    body.stream-mode .location-card {
+      background: rgba(11, 13, 18, 0.9);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-sub {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0px;
+    }
+
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+    }
+
+    .status-badge {
+      background: rgba(0, 255, 102, 0.1);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-action {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .btn-reset:hover {
+      background: var(--accent-red);
+      border-color: var(--accent-red);
+      color: #000;
+    }
+
+    /* MAIN ACTIVE ROSTER GRID */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      flex: 1;
+    }
+
+    .location-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      backdrop-filter: blur(4px);
+      position: relative;
+    }
+
+    .location-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+    }
+
+    .card-desk::before { background: var(--accent-cyan); }
+    .card-couch::before { background: var(--accent-amber); }
+    .card-table::before { background: var(--accent-green); }
+
+    .location-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .location-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .card-desk .location-title { color: var(--accent-cyan); }
+    .card-couch .location-title { color: var(--accent-amber); }
+    .card-table .location-title { color: var(--accent-green); }
+
+    .location-sub {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .slot-counter {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .slots-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    /* GAME SLOTS & ITEMS */
+    .game-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .game-item:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    /* NOW PLAYING HIGHLIGHT */
+    .game-item.now-playing {
+      border-color: var(--accent-cyan) !important;
+      background: rgba(0, 240, 255, 0.12) !important;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+      animation: pulse-glow 2s infinite alternate;
+    }
+
+    @keyframes pulse-glow {
+      from { box-shadow: 0 0 8px rgba(0, 240, 255, 0.2); }
+      to { box-shadow: 0 0 18px rgba(0, 240, 255, 0.4); }
+    }
+
+    .now-playing-badge {
+      font-size: 0.65rem;
+      background: var(--accent-cyan);
+      color: #000;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-right: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .platform-tag {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .item-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-edit-item {
+      opacity: 0.3;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 4px;
+    }
+
+    .game-item:hover .btn-edit-item {
+      opacity: 1;
+    }
+
+    .slot-empty {
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      background: var(--slot-empty);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 0.8rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .slot-empty:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* MODAL OVERLAY */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 8px;
+      padding: 24px;
+      width: 360px;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+    }
+
+    .modal-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.1rem;
+      color: var(--accent-cyan);
+      margin-bottom: 16px;
+    }
+
+    .modal-field {
+      margin-bottom: 14px;
+    }
+
+    .modal-field label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .modal-field input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
+    .modal-field input:focus {
+      border-color: var(--accent-cyan);
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .btn-modal {
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn-save {
+      background: var(--accent-cyan);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border-color: var(--border-color);
+      color: var(--text-dim);
+    }
+
+    .btn-delete {
+      background: transparent;
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+  </style>
+</head>
+<body>
+
+  <header id="main-header">
+    <div class="brand">
+      <span>CG-OS</span>
+      <span class="brand-sub">:: CHAINGEAR GAMING OPERATING SYSTEM</span>
+    </div>
+    <div class="system-status">
+      <div class="status-badge">System Active</div>
+      <button class="btn-action" onclick="toggleStreamMode()">Stream Mode [S]</button>
+      <button class="btn-action btn-reset" onclick="resetRoster()">Reset Setup</button>
+    </div>
+  </header>
+
+  <!-- ACTIVE LOCATIONS GRID -->
+  <main class="dashboard-grid">
+    
+    <!-- DESK -->
+    <section class="location-card card-desk">
+      <div class="location-header">
+        <div>
+          <div class="location-title">🖥️ The Desk</div>
+          <div class="location-sub">High-APM / PC Rig & Discord</div>
+        </div>
+        <div class="slot-counter" id="counter-desk">0/5</div>
+      </div>
+      <div class="slots-container" id="slots-desk"></div>
+    </section>
+
+    <!-- COUCH -->
+    <section class="location-card card-couch">
+      <div class="location-header">
+        <div>
+          <div class="location-title">🛋️ The Couch</div>
+          <div class="location-sub">Lounge / PS5 Pro & Laptop</div>
+        </div>
+        <div class="slot-counter" id="counter-couch">0/5</div>
+      </div>
+      <div class="slots-container" id="slots-couch"></div>
+    </section>
+
+    <!-- GAMING TABLE -->
+    <section class="location-card card-table">
+      <div class="location-header">
+        <div>
+          <div class="location-title">🎲 The Gaming Table</div>
+          <div class="location-sub">Strictly Physical / Tabletop & TCGs</div>
+        </div>
+        <div class="slot-counter" id="counter-table">0/5</div>
+      </div>
+      <div class="slots-container" id="slots-table"></div>
+    </section>
+
+  </main>
+
+  <!-- SWAP / EDIT MODAL -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title-text">Edit Roster Slot</div>
+      
+      <div class="modal-field">
+        <label for="input-title">Game Title</label>
+        <input type="text" id="input-title" placeholder="e.g. Ultrakill">
+      </div>
+
+      <div class="modal-field">
+        <label for="input-platform">Platform / Hardware Tag</label>
+        <input type="text" id="input-platform" placeholder="e.g. PC / Rig">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal btn-delete" id="btn-modal-delete" onclick="deleteCurrentItem()">Remove</button>
+        <div>
+          <button class="btn-modal btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="btn-modal btn-save" onclick="saveModalItem()">Save Slot</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const INITIAL_ROSTER = {
+      desk: [
+        { id: '1', title: 'Ultrakill', platform: 'PC / Rig' },
+        { id: '2', title: 'CICADAMATA', platform: 'PC / Rig' },
+        { id: '3', title: 'Zenless Zone Zero / Wuthering Waves', platform: 'PC / Rig' },
+        { id: '4', title: 'BALL x PIT', platform: 'PC / Rig' }
+      ],
+      couch: [
+        { id: '5', title: 'Big Walk', platform: 'PS5 Pro' },
+        { id: '6', title: 'Final Fantasy VII Rebirth', platform: 'PS5 Pro' },
+        { id: '7', title: 'Vampire Survivors', platform: 'Laptop' },
+        { id: '8', title: 'BALL x PIT', platform: 'Laptop' },
+        { id: '9', title: 'Dead Cells', platform: 'PS5 Pro' }
+      ],
+      table: [
+        { id: '10', title: 'MTG Commander Raids', platform: 'Physical TCG' },
+        { id: '11', title: 'Dice Throne', platform: 'Board Game' },
+        { id: '12', title: 'Dungeons & Dragons', platform: 'Tabletop RPG' },
+        { id: '13', title: 'Flesh and Blood PvE', platform: 'Physical TCG' }
+      ]
+    };
+
+    let state = JSON.parse(localStorage.getItem('cgos_active_state')) || INITIAL_ROSTER;
+    let nowPlayingId = localStorage.getItem('cgos_now_playing') || null;
+
+    let activeEditLocation = null;
+    let activeEditGameId = null;
+
+    function saveState() {
+      localStorage.setItem('cgos_active_state', JSON.stringify(state));
+      localStorage.setItem('cgos_now_playing', nowPlayingId);
+    }
+
+    function render() {
+      ['desk', 'couch', 'table'].forEach(loc => {
+        const container = document.getElementById(`slots-${loc}`);
+        container.innerHTML = '';
+
+        // Render Active Games
+        state[loc].forEach(game => {
+          const isNowPlaying = (game.id === nowPlayingId);
+          const item = document.createElement('div');
+          item.className = `game-item ${isNowPlaying ? 'now-playing' : ''}`;
+          item.onclick = (e) => {
+            if (!e.target.classList.contains('btn-edit-item')) {
+              toggleNowPlaying(game.id);
+            }
+          };
+
+          item.innerHTML = `
+            <div style="display:flex; align-items:center;">
+              ${isNowPlaying ? '<span class="now-playing-badge">NOW PLAYING</span>' : ''}
+              <span>${game.title}</span>
+            </div>
+            <div class="item-controls">
+              <span class="platform-tag">${game.platform}</span>
+              <button class="btn-edit-item" title="Edit Game" onclick="openModal('${loc}', '${game.id}')">✏️</button>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+
+        // Render Empty Dotted Slots (Cap of 5)
+        const emptyCount = 5 - state[loc].length;
+        for (let i = 0; i < emptyCount; i++) {
+          const emptySlot = document.createElement('div');
+          emptySlot.className = 'slot-empty';
+          emptySlot.innerText = '[ + OPEN SLOT ]';
+          emptySlot.onclick = () => openModal(loc, null);
+          container.appendChild(emptySlot);
+        }
+        
+        document.getElementById(`counter-${loc}`).innerText = `${state[loc].length}/5`;
+      });
+    }
+
+    // 1. NOW PLAYING HIGHLIGHT TOGGLE
+    function toggleNowPlaying(gameId) {
+      if (nowPlayingId === gameId) {
+        nowPlayingId = null; // Deselect if clicked again
+      } else {
+        nowPlayingId = gameId;
+      }
+      saveState();
+      render();
+    }
+
+    // 2. QUICK MODAL EDIT / SWAP
+    function openModal(location, gameId) {
+      activeEditLocation = location;
+      activeEditGameId = gameId;
+
+      const modal = document.getElementById('edit-modal');
+      const titleInput = document.getElementById('input-title');
+      const platformInput = document.getElementById('input-platform');
+      const deleteBtn = document.getElementById('btn-modal-delete');
+      const modalTitle = document.getElementById('modal-title-text');
+
+      if (gameId) {
+        const game = state[location].find(g => g.id === gameId);
+        modalTitle.innerText = "Edit Roster Item";
+        titleInput.value = game.title;
+        platformInput.value = game.platform;
+        deleteBtn.style.display = 'block';
+      } else {
+        modalTitle.innerText = "Add New Game to Roster";
+        titleInput.value = '';
+        platformInput.value = '';
+        deleteBtn.style.display = 'none';
+      }
+
+      modal.style.display = 'flex';
+      titleInput.focus();
+    }
+
+    function closeModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+      activeEditLocation = null;
+      activeEditGameId = null;
+    }
+
+    function saveModalItem() {
+      const title = document.getElementById('input-title').value.trim();
+      const platform = document.getElementById('input-platform').value.trim() || 'Active';
+
+      if (!title) return;
+
+      if (activeEditGameId) {
+        // Update Existing Item
+        const game = state[activeEditLocation].find(g => g.id === activeEditGameId);
+        game.title = title;
+        game.platform = platform;
+      } else {
+        // Add New Item to Location
+        if (state[activeEditLocation].length >= 5) {
+          alert("Location capacity reached (5/5). Remove an item first.");
+          return;
+        }
+        const newGame = {
+          id: Date.now().toString(),
+          title: title,
+          platform: platform
+        };
+        state[activeEditLocation].push(newGame);
+      }
+
+      saveState();
+      render();
+      closeModal();
+    }
+
+    function deleteCurrentItem() {
+      if (!activeEditGameId || !activeEditLocation) return;
+      
+      state[activeEditLocation] = state[activeEditLocation].filter(g => g.id !== activeEditGameId);
+      if (nowPlayingId === activeEditGameId) nowPlayingId = null;
+
+      saveState();
+      render();
+      closeModal();
+    }
+
+    // 3. STREAM MODE TOGGLE
+    function toggleStreamMode() {
+      document.body.classList.toggle('stream-mode');
+    }
+
+    // Keyboard shortcut 'S' for Stream Mode
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 's' || e.key === 'S') {
+        if (document.activeElement.tagName !== 'INPUT') {
+          toggleStreamMode();
+        }
+      }
+    });
+
+    function resetRoster() {
+      if (confirm("Reset CG-OS Dashboard back to default setup?")) {
+        state = JSON.parse(JSON.stringify(INITIAL_ROSTER));
+        nowPlayingId = null;
+        saveState();
+        render();
+      }
+    }
+
+    // Initial Load
+    render();
+  </script>
+</body>
+</html>
