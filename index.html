@@ -13,6 +13,8 @@
       --accent-cyan: #00f0ff;
       --accent-green: #00ff66;
       --accent-amber: #ffb700;
+      --accent-purple: #b026ff;
+      --accent-blue: #3b82f6;
       --accent-red: #ff3366;
       --text-main: #e2e8f0;
       --text-dim: #64748b;
@@ -39,23 +41,6 @@
         linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
       background-size: 100% 100%, 30px 30px, 30px 30px;
-      transition: background 0.3s ease;
-    }
-
-    /* STREAM MODE OVERRIDES */
-    body.stream-mode {
-      background: transparent !important;
-      background-image: none !important;
-      padding: 10px;
-    }
-
-    body.stream-mode header {
-      display: none;
-    }
-
-    body.stream-mode .location-card {
-      background: rgba(11, 13, 18, 0.9);
-      border-color: rgba(255, 255, 255, 0.1);
     }
 
     header {
@@ -125,12 +110,25 @@
       color: #000;
     }
 
-    /* MAIN ACTIVE ROSTER GRID */
+    .section-label {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* GRID LAYOUTS */
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 24px;
-      flex: 1;
+      margin-bottom: 28px;
     }
 
     .location-card {
@@ -196,9 +194,10 @@
       flex-direction: column;
       gap: 10px;
       flex: 1;
+      min-height: 100px;
     }
 
-    /* GAME SLOTS & ITEMS */
+    /* GAME ITEMS */
     .game-item {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -208,9 +207,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
+      cursor: grab;
       transition: all 0.2s ease;
       position: relative;
+    }
+
+    .game-item:active {
+      cursor: grabbing;
     }
 
     .game-item:hover {
@@ -218,7 +221,11 @@
       background: rgba(0, 240, 255, 0.05);
     }
 
-    /* NOW PLAYING HIGHLIGHT */
+    .game-item.dragging {
+      opacity: 0.3;
+      border-style: dashed;
+    }
+
     .game-item.now-playing {
       border-color: var(--accent-cyan) !important;
       background: rgba(0, 240, 255, 0.12) !important;
@@ -294,6 +301,95 @@
       background: rgba(255, 255, 255, 0.05);
     }
 
+    /* NEXT UP SECTION */
+    .nextup-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .nextup-card {
+      background: rgba(18, 22, 31, 0.5);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .nextup-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent-purple);
+    }
+
+    .nextup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .nextup-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-purple);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* PAUSED / LIMBO SECTION */
+    .limbo-card {
+      background: rgba(18, 22, 31, 0.4);
+      border: 1px dashed rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .limbo-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent-blue);
+    }
+
+    .limbo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .limbo-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .limbo-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      min-height: 50px;
+    }
+
     /* MODAL OVERLAY */
     .modal-overlay {
       position: fixed;
@@ -314,7 +410,7 @@
       border: 1px solid var(--accent-cyan);
       border-radius: 8px;
       padding: 24px;
-      width: 360px;
+      width: 380px;
       box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
     }
 
@@ -336,9 +432,9 @@
       margin-bottom: 6px;
     }
 
-    .modal-field input {
+    .modal-field input, .modal-field select {
       width: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.6);
       border: 1px solid var(--border-color);
       color: var(--text-main);
       padding: 8px 10px;
@@ -347,7 +443,12 @@
       font-size: 0.85rem;
     }
 
-    .modal-field input:focus {
+    .modal-field select option {
+      background: #12161f;
+      color: var(--text-main);
+    }
+
+    .modal-field input:focus, .modal-field select:focus {
       border-color: var(--accent-cyan);
       outline: none;
     }
@@ -395,65 +496,118 @@
     </div>
     <div class="system-status">
       <div class="status-badge">System Active</div>
-      <button class="btn-action" onclick="toggleStreamMode()">Stream Mode [S]</button>
       <button class="btn-action btn-reset" onclick="resetRoster()">Reset Setup</button>
     </div>
   </header>
 
+  <div class="section-label">⚡ Active Rosters (Max 5)</div>
+
   <!-- ACTIVE LOCATIONS GRID -->
   <main class="dashboard-grid">
-    
-    <!-- DESK -->
     <section class="location-card card-desk">
       <div class="location-header">
         <div>
           <div class="location-title">🖥️ The Desk</div>
           <div class="location-sub">High-APM / PC Rig & Discord</div>
         </div>
-        <div class="slot-counter" id="counter-desk">0/5</div>
+        <div class="slot-counter" id="counter-active-desk">0/5</div>
       </div>
-      <div class="slots-container" id="slots-desk"></div>
+      <div class="slots-container" id="slots-active-desk" ondragover="allowDrop(event)" ondrop="drop(event, 'active', 'desk')"></div>
     </section>
 
-    <!-- COUCH -->
     <section class="location-card card-couch">
       <div class="location-header">
         <div>
           <div class="location-title">🛋️ The Couch</div>
           <div class="location-sub">Lounge / PS5 Pro & Laptop</div>
         </div>
-        <div class="slot-counter" id="counter-couch">0/5</div>
+        <div class="slot-counter" id="counter-active-couch">0/5</div>
       </div>
-      <div class="slots-container" id="slots-couch"></div>
+      <div class="slots-container" id="slots-active-couch" ondragover="allowDrop(event)" ondrop="drop(event, 'active', 'couch')"></div>
     </section>
 
-    <!-- GAMING TABLE -->
     <section class="location-card card-table">
       <div class="location-header">
         <div>
           <div class="location-title">🎲 The Gaming Table</div>
           <div class="location-sub">Strictly Physical / Tabletop & TCGs</div>
         </div>
-        <div class="slot-counter" id="counter-table">0/5</div>
+        <div class="slot-counter" id="counter-active-table">0/5</div>
       </div>
-      <div class="slots-container" id="slots-table"></div>
+      <div class="slots-container" id="slots-active-table" ondragover="allowDrop(event)" ondrop="drop(event, 'active', 'table')"></div>
     </section>
-
   </main>
 
-  <!-- SWAP / EDIT MODAL -->
+  <div class="section-label" style="color: var(--accent-purple);">🔮 Next Up / On Deck (Max 5)</div>
+
+  <!-- NEXT UP GRID -->
+  <section class="nextup-grid">
+    <div class="nextup-card">
+      <div class="nextup-header">
+        <div class="nextup-title">Desk Pipeline</div>
+        <div class="slot-counter" id="counter-nextup-desk">0/5</div>
+      </div>
+      <div class="slots-container" id="slots-nextup-desk" ondragover="allowDrop(event)" ondrop="drop(event, 'nextup', 'desk')"></div>
+    </div>
+
+    <div class="nextup-card">
+      <div class="nextup-header">
+        <div class="nextup-title">Couch Pipeline</div>
+        <div class="slot-counter" id="counter-nextup-couch">0/5</div>
+      </div>
+      <div class="slots-container" id="slots-nextup-couch" ondragover="allowDrop(event)" ondrop="drop(event, 'nextup', 'couch')"></div>
+    </div>
+
+    <div class="nextup-card">
+      <div class="nextup-header">
+        <div class="nextup-title">Tabletop Pipeline</div>
+        <div class="slot-counter" id="counter-nextup-table">0/5</div>
+      </div>
+      <div class="slots-container" id="slots-nextup-table" ondragover="allowDrop(event)" ondrop="drop(event, 'nextup', 'table')"></div>
+    </div>
+  </section>
+
+  <div class="section-label" style="color: var(--accent-blue);">⏸️ On Pause / Limbo (Drag Here to Hold)</div>
+
+  <!-- LIMBO SECTION -->
+  <section class="limbo-card">
+    <div class="limbo-header">
+      <div class="limbo-title">Limbo Buffer</div>
+      <div class="location-sub">Games put on hold to return to soon</div>
+    </div>
+    <div class="limbo-container" id="slots-limbo-main" ondragover="allowDrop(event)" ondrop="drop(event, 'limbo', 'main')"></div>
+  </section>
+
+  <!-- MODAL -->
   <div class="modal-overlay" id="edit-modal">
     <div class="modal-box">
       <div class="modal-title" id="modal-title-text">Edit Roster Slot</div>
       
       <div class="modal-field">
         <label for="input-title">Game Title</label>
-        <input type="text" id="input-title" placeholder="e.g. Ultrakill">
+        <input type="text" id="input-title" placeholder="e.g. Judas">
       </div>
 
       <div class="modal-field">
-        <label for="input-platform">Platform / Hardware Tag</label>
-        <input type="text" id="input-platform" placeholder="e.g. PC / Rig">
+        <label for="select-platform">Platform / Hardware Tag</label>
+        <select id="select-platform" onchange="handlePlatformChange(this)">
+          <option value="PC / Rig">PC / Rig</option>
+          <option value="PS5 Pro">PS5 Pro</option>
+          <option value="Steam Deck">Steam Deck</option>
+          <option value="Laptop">Laptop</option>
+          <option value="Physical TCG">Physical TCG</option>
+          <option value="Board Game">Board Game</option>
+          <option value="Tabletop RPG">Tabletop RPG</option>
+          <option value="Nintendo Switch">Nintendo Switch</option>
+          <option value="Handheld / Vita">Handheld / Vita</option>
+          <option value="Analogue Pocket">Analogue Pocket</option>
+          <option value="custom">Other / Custom...</option>
+        </select>
+      </div>
+
+      <div class="modal-field" id="custom-platform-container" style="display: none;">
+        <label for="input-custom-platform">Custom Platform Name</label>
+        <input type="text" id="input-custom-platform" placeholder="e.g. GameCube Mod">
       </div>
 
       <div class="modal-actions">
@@ -468,48 +622,83 @@
 
   <script>
     const INITIAL_ROSTER = {
-      desk: [
-        { id: '1', title: 'Ultrakill', platform: 'PC / Rig' },
-        { id: '2', title: 'CICADAMATA', platform: 'PC / Rig' },
-        { id: '3', title: 'Zenless Zone Zero / Wuthering Waves', platform: 'PC / Rig' },
-        { id: '4', title: 'BALL x PIT', platform: 'PC / Rig' }
-      ],
-      couch: [
-        { id: '5', title: 'Big Walk', platform: 'PS5 Pro' },
-        { id: '6', title: 'Final Fantasy VII Rebirth', platform: 'PS5 Pro' },
-        { id: '7', title: 'Vampire Survivors', platform: 'Laptop' },
-        { id: '8', title: 'BALL x PIT', platform: 'Laptop' },
-        { id: '9', title: 'Dead Cells', platform: 'PS5 Pro' }
-      ],
-      table: [
-        { id: '10', title: 'MTG Commander Raids', platform: 'Physical TCG' },
-        { id: '11', title: 'Dice Throne', platform: 'Board Game' },
-        { id: '12', title: 'Dungeons & Dragons', platform: 'Tabletop RPG' },
-        { id: '13', title: 'Flesh and Blood PvE', platform: 'Physical TCG' }
-      ]
+      active: {
+        desk: [
+          { id: '1', title: 'Ultrakill', platform: 'PC / Rig' },
+          { id: '2', title: 'CICADAMATA', platform: 'PC / Rig' },
+          { id: '3', title: 'Zenless Zone Zero / Wuthering Waves', platform: 'PC / Rig' },
+          { id: '4', title: 'BALL x PIT', platform: 'PC / Rig' }
+        ],
+        couch: [
+          { id: '5', title: 'Big Walk', platform: 'PS5 Pro' },
+          { id: '6', title: 'Final Fantasy VII Rebirth', platform: 'PS5 Pro' },
+          { id: '7', title: 'Vampire Survivors', platform: 'Laptop' },
+          { id: '8', title: 'BALL x PIT', platform: 'Laptop' },
+          { id: '9', title: 'Dead Cells', platform: 'PS5 Pro' }
+        ],
+        table: [
+          { id: '10', title: 'MTG Commander Raids', platform: 'Physical TCG' },
+          { id: '11', title: 'Dice Throne', platform: 'Board Game' },
+          { id: '12', title: 'Dungeons & Dragons', platform: 'Tabletop RPG' },
+          { id: '13', title: 'Flesh and Blood PvE', platform: 'Physical TCG' }
+        ]
+      },
+      nextup: {
+        desk: [
+          { id: 'n1', title: 'Judas', platform: 'PC / Rig' }
+        ],
+        couch: [
+          { id: 'n2', title: 'Monster Hunter Wilds', platform: 'PS5 Pro' },
+          { id: 'n3', title: 'Death Stranding 2', platform: 'PS5 Pro' }
+        ],
+        table: [
+          { id: 'n4', title: 'MTG Lorwyn Eclipsed', platform: 'Physical TCG' }
+        ]
+      },
+      limbo: {
+        main: [
+          { id: 'l1', title: 'Super Mario Eclipse', platform: 'Steam Deck' }
+        ]
+      }
     };
 
-    let state = JSON.parse(localStorage.getItem('cgos_active_state')) || INITIAL_ROSTER;
+    let state = JSON.parse(localStorage.getItem('cgos_v3_state')) || INITIAL_ROSTER;
     let nowPlayingId = localStorage.getItem('cgos_now_playing') || null;
 
+    let activeSection = null;
     let activeEditLocation = null;
     let activeEditGameId = null;
+    let draggedInfo = null;
 
     function saveState() {
-      localStorage.setItem('cgos_active_state', JSON.stringify(state));
+      localStorage.setItem('cgos_v3_state', JSON.stringify(state));
       localStorage.setItem('cgos_now_playing', nowPlayingId);
     }
 
-    function render() {
-      ['desk', 'couch', 'table'].forEach(loc => {
-        const container = document.getElementById(`slots-${loc}`);
+    function renderSection(sec, cap) {
+      const locations = sec === 'limbo' ? ['main'] : ['desk', 'couch', 'table'];
+      
+      locations.forEach(loc => {
+        const container = document.getElementById(`slots-${sec}-${loc}`);
+        if (!container) return;
         container.innerHTML = '';
 
-        // Render Active Games
-        state[loc].forEach(game => {
+        state[sec][loc].forEach(game => {
           const isNowPlaying = (game.id === nowPlayingId);
           const item = document.createElement('div');
           item.className = `game-item ${isNowPlaying ? 'now-playing' : ''}`;
+          item.draggable = true;
+
+          item.ondragstart = (e) => {
+            draggedInfo = { sec, loc, id: game.id };
+            item.classList.add('dragging');
+          };
+
+          item.ondragend = () => {
+            item.classList.remove('dragging');
+            draggedInfo = null;
+          };
+
           item.onclick = (e) => {
             if (!e.target.classList.contains('btn-edit-item')) {
               toggleNowPlaying(game.id);
@@ -523,58 +712,115 @@
             </div>
             <div class="item-controls">
               <span class="platform-tag">${game.platform}</span>
-              <button class="btn-edit-item" title="Edit Game" onclick="openModal('${loc}', '${game.id}')">✏️</button>
+              <button class="btn-edit-item" title="Edit Game" onclick="openModal('${sec}', '${loc}', '${game.id}')">✏️</button>
             </div>
           `;
           container.appendChild(item);
         });
 
-        // Render Empty Dotted Slots (Cap of 5)
-        const emptyCount = 5 - state[loc].length;
-        for (let i = 0; i < emptyCount; i++) {
-          const emptySlot = document.createElement('div');
-          emptySlot.className = 'slot-empty';
-          emptySlot.innerText = '[ + OPEN SLOT ]';
-          emptySlot.onclick = () => openModal(loc, null);
-          container.appendChild(emptySlot);
+        if (cap) {
+          const emptyCount = cap - state[sec][loc].length;
+          for (let i = 0; i < emptyCount; i++) {
+            const emptySlot = document.createElement('div');
+            emptySlot.className = 'slot-empty';
+            emptySlot.innerText = sec === 'active' ? '[ + OPEN SLOT ]' : '[ + OPEN NEXT UP ]';
+            emptySlot.onclick = () => openModal(sec, loc, null);
+            container.appendChild(emptySlot);
+          }
+          const counterEl = document.getElementById(`counter-${sec}-${loc}`);
+          if (counterEl) counterEl.innerText = `${state[sec][loc].length}/${cap}`;
         }
-        
-        document.getElementById(`counter-${loc}`).innerText = `${state[loc].length}/5`;
       });
     }
 
-    // 1. NOW PLAYING HIGHLIGHT TOGGLE
-    function toggleNowPlaying(gameId) {
-      if (nowPlayingId === gameId) {
-        nowPlayingId = null; // Deselect if clicked again
-      } else {
-        nowPlayingId = gameId;
+    function render() {
+      renderSection('active', 5);
+      renderSection('nextup', 5);
+      renderSection('limbo', null);
+    }
+
+    function allowDrop(e) {
+      e.preventDefault();
+    }
+
+    function drop(e, targetSec, targetLoc) {
+      e.preventDefault();
+      if (!draggedInfo) return;
+
+      const { sec: srcSec, loc: srcLoc, id: srcId } = draggedInfo;
+
+      if (srcSec === targetSec && srcLoc === targetLoc) return;
+
+      const cap = targetSec === 'active' ? 5 : (targetSec === 'nextup' ? 5 : Infinity);
+      if (cap !== Infinity && state[targetSec][targetLoc].length >= cap) {
+        alert(`Target list is full (Max ${cap}).`);
+        return;
       }
+
+      const itemIdx = state[srcSec][srcLoc].findIndex(g => g.id === srcId);
+      if (itemIdx === -1) return;
+
+      const [item] = state[srcSec][srcLoc].splice(itemIdx, 1);
+      state[targetSec][targetLoc].push(item);
+
       saveState();
       render();
     }
 
-    // 2. QUICK MODAL EDIT / SWAP
-    function openModal(location, gameId) {
+    function toggleNowPlaying(gameId) {
+      nowPlayingId = (nowPlayingId === gameId) ? null : gameId;
+      saveState();
+      render();
+    }
+
+    function handlePlatformChange(selectElem) {
+      const customInputContainer = document.getElementById('custom-platform-container');
+      if (selectElem.value === 'custom') {
+        customInputContainer.style.display = 'block';
+        document.getElementById('input-custom-platform').focus();
+      } else {
+        customInputContainer.style.display = 'none';
+      }
+    }
+
+    function openModal(section, location, gameId) {
+      activeSection = section;
       activeEditLocation = location;
       activeEditGameId = gameId;
 
       const modal = document.getElementById('edit-modal');
       const titleInput = document.getElementById('input-title');
-      const platformInput = document.getElementById('input-platform');
+      const platformSelect = document.getElementById('select-platform');
+      const customPlatformInput = document.getElementById('input-custom-platform');
+      const customContainer = document.getElementById('custom-platform-container');
       const deleteBtn = document.getElementById('btn-modal-delete');
       const modalTitle = document.getElementById('modal-title-text');
 
       if (gameId) {
-        const game = state[location].find(g => g.id === gameId);
-        modalTitle.innerText = "Edit Roster Item";
+        const game = state[section][location].find(g => g.id === gameId);
+        modalTitle.innerText = `Edit Slot`;
         titleInput.value = game.title;
-        platformInput.value = game.platform;
+
+        const options = Array.from(platformSelect.options).map(o => o.value);
+        if (options.includes(game.platform)) {
+          platformSelect.value = game.platform;
+          customContainer.style.display = 'none';
+        } else {
+          platformSelect.value = 'custom';
+          customPlatformInput.value = game.platform;
+          customContainer.style.display = 'block';
+        }
+
         deleteBtn.style.display = 'block';
       } else {
-        modalTitle.innerText = "Add New Game to Roster";
+        modalTitle.innerText = `Add New Title`;
         titleInput.value = '';
-        platformInput.value = '';
+        
+        if (location === 'desk') platformSelect.value = 'PC / Rig';
+        else if (location === 'couch') platformSelect.value = 'PS5 Pro';
+        else if (location === 'table') platformSelect.value = 'Physical TCG';
+        
+        customContainer.style.display = 'none';
         deleteBtn.style.display = 'none';
       }
 
@@ -584,25 +830,32 @@
 
     function closeModal() {
       document.getElementById('edit-modal').style.display = 'none';
+      activeSection = null;
       activeEditLocation = null;
       activeEditGameId = null;
     }
 
     function saveModalItem() {
       const title = document.getElementById('input-title').value.trim();
-      const platform = document.getElementById('input-platform').value.trim() || 'Active';
+      const platformSelect = document.getElementById('select-platform').value;
+      const customPlatform = document.getElementById('input-custom-platform').value.trim();
 
       if (!title) return;
 
+      let platform = platformSelect;
+      if (platformSelect === 'custom') {
+        platform = customPlatform || 'Custom';
+      }
+
+      const maxCap = activeSection === 'active' ? 5 : (activeSection === 'nextup' ? 5 : Infinity);
+
       if (activeEditGameId) {
-        // Update Existing Item
-        const game = state[activeEditLocation].find(g => g.id === activeEditGameId);
+        const game = state[activeSection][activeEditLocation].find(g => g.id === activeEditGameId);
         game.title = title;
         game.platform = platform;
       } else {
-        // Add New Item to Location
-        if (state[activeEditLocation].length >= 5) {
-          alert("Location capacity reached (5/5). Remove an item first.");
+        if (maxCap !== Infinity && state[activeSection][activeEditLocation].length >= maxCap) {
+          alert(`Capacity reached (${maxCap}/${maxCap}). Remove an item first.`);
           return;
         }
         const newGame = {
@@ -610,7 +863,7 @@
           title: title,
           platform: platform
         };
-        state[activeEditLocation].push(newGame);
+        state[activeSection][activeEditLocation].push(newGame);
       }
 
       saveState();
@@ -619,29 +872,15 @@
     }
 
     function deleteCurrentItem() {
-      if (!activeEditGameId || !activeEditLocation) return;
+      if (!activeEditGameId || !activeEditLocation || !activeSection) return;
       
-      state[activeEditLocation] = state[activeEditLocation].filter(g => g.id !== activeEditGameId);
+      state[activeSection][activeEditLocation] = state[activeSection][activeEditLocation].filter(g => g.id !== activeEditGameId);
       if (nowPlayingId === activeEditGameId) nowPlayingId = null;
 
       saveState();
       render();
       closeModal();
     }
-
-    // 3. STREAM MODE TOGGLE
-    function toggleStreamMode() {
-      document.body.classList.toggle('stream-mode');
-    }
-
-    // Keyboard shortcut 'S' for Stream Mode
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 's' || e.key === 'S') {
-        if (document.activeElement.tagName !== 'INPUT') {
-          toggleStreamMode();
-        }
-      }
-    });
 
     function resetRoster() {
       if (confirm("Reset CG-OS Dashboard back to default setup?")) {
@@ -652,7 +891,6 @@
       }
     }
 
-    // Initial Load
     render();
   </script>
 </body>
